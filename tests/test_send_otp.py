@@ -5,9 +5,17 @@ NOTE: This test validates the function logic without actually sending emails
 since we don't have SMTP credentials configured.
 """
 
+#Add the repo root to sys.path in your test file
+
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent)) 
+
 from auth.mail import send_email_otp
 from unittest.mock import patch, MagicMock
 import smtplib
+
+
 
 def test_send_email_otp_mock():
     """Test send_email_otp with mocked SMTP to avoid actually sending emails."""
