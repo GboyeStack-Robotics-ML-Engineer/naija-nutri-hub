@@ -1,0 +1,10 @@
+Defaulting to user installation because normal site-packages is not writeable
+Collecting python-jose
+  Downloading python_jose-3.5.0-py2.py3-none-any.whl.metadata (5.5 kB)
+Requirement already satisfied: ecdsa!=0.15 in c:\users\adegboyega\appdata\roaming\python\python313\site-packages (from python-jose) (0.19.1)
+Requirement already satisfied: rsa!=4.1.1,!=4.4,<5.0,>=4.0 in c:\users\adegboyega\appdata\roaming\python\python313\site-packages (from python-jose) (4.9.1)
+Requirement already satisfied: pyasn1>=0.5.0 in c:\users\adegboyega\appdata\roaming\python\python313\site-packages (from python-jose) (0.6.1)
+Requirement already satisfied: six>=1.9.0 in c:\users\adegboyega\appdata\roaming\python\python313\site-packages (from ecdsa!=0.15->python-jose) (1.17.0)
+Downloading python_jose-3.5.0-py2.py3-none-any.whl (34 kB)
+Installing collected packages: python-jose
+Successfully installed python-jose-3.5.0

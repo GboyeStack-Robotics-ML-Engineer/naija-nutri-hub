@@ -1,4 +1,4 @@
-from classifier_tools import classify_food_image
+from classifier_tools import classify_food_image, augment_output
 
 from PIL import Image
 
@@ -18,6 +18,7 @@ if __name__ == "__main__":
     image_path = "./test_images/image.jpg"  
     image=Image.open(image_path).convert("RGB")
     predicted_food = classify_image(image)
+    response=augment_output(predicted_food)
     print(f"Predicted food: {predicted_food}")
 
 
