@@ -4,9 +4,9 @@ try:
     from ultralytics import YOLO
 except:
     import os
-    os.system('pip uninstall ultralytics')
-    os.system('pip install ultralytics')
-    from ultralytics import YOLO
+    # os.system('pip uninstall ultralytics')
+    # os.system('pip install ultralytics')
+    # from ultralytics import YOLO
 
 from PIL import Image
 import os
@@ -145,3 +145,9 @@ if __name__ == "__main__":
 
     print(response)
 
+def classify_food_image_azure(image) -> str:
+    """
+    Classifies a food image using trained model from Azure Custom Vision and returns the predicted food name.
+    """
+
+    return

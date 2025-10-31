@@ -49,7 +49,7 @@ from schemas.schema import (
 from config.database import otp_record, user_auth
 # Features DB
 
-from config.database import classification_requests, recipe_requests, nutrition_requests
+from config.database import classification_requests, recipe_requests, nutrition_requests, purchase_loc_requests
 
 
 # Import the recipe generation function
@@ -287,7 +287,20 @@ async def read_users_me(current_user: dict = Depends(get_current_user)):
     An example protected route that returns the current authenticated user's data.
     """
     # We serialize it here to hide sensitive info like password hash
-    return user_serializer(current_user)
+    user_email = current_user.get("email")
+    user_dict = user_auth.find_one({"email": user_email})
+    return user_serializer(user_dict)
+
+# Get User history
+@app.get("/users/history", tags=["Users"])
+async def get_user_history(current_user: dict = Depends(get_current_user)):
+    """
+    Returns a list of the user's request history across all features sorted by timestamp descending.
+    """
+
+    return
+
+
 
 
 @app.post("/verify_reset_otp", tags=["Authentication"])
@@ -396,7 +409,12 @@ async def recipe_generation(recipe_data: RecipePayload, current_user:dict = Depe
         )
      # Main Implementation (with function calls)
     try:
-        generated_recipe = get_recipe_for_dish(recipe_data.food_name.strip())
+        generated_recipe = get_recipe_for_dish(
+            food_name=recipe_data.food_name.strip(),
+            servings=recipe_data.servings,
+            dietary_restriction=recipe_data.dietary_restriction,
+            extra_inputs=recipe_data.extra_inputs
+        )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Recipe generation failed: {exc}")
     if not generated_recipe:
@@ -416,7 +434,7 @@ async def recipe_generation(recipe_data: RecipePayload, current_user:dict = Depe
 
     return {
         "message": "Recipe request stored successfully.",
-        "food_name: recipe_data.food_name.strip(),"
+        "food_name": recipe_data.food_name.strip(),
         "generated_recipe": generated_recipe,
         "request_metadata": {
             "timestamp": request_document["timestamp"].isoformat() if "timestamp" in request_document else None,
@@ -450,7 +468,7 @@ def nutritional_estimates(nutrition_data: NutritionPayload, current_user:dict = 
         user_email = current_user["email"]
         current_timestamp = datetime.utcnow()
         nutrition_record = {
-            "email": user_email.lower(),
+            "email": user_email,
             "food_name": nutrition_data.food_name.strip(),
             "portion_size": nutrition_data.portion_size.strip() if nutrition_data.portion_size else None,
             "extra_inputs": nutrition_data.extra_inputs if nutrition_data.extra_inputs else None,
@@ -466,16 +484,41 @@ def nutritional_estimates(nutrition_data: NutritionPayload, current_user:dict = 
 
 ## Purchase Locations
 @app.post("/features/purchase_locations", tags=["Features"])
-def purchase_locations(purchase_data: PurchasePayload):
+def purchase_locations(purchase_data: PurchasePayload, current_user:dict=Depends(get_current_user)):
     """
     Accepts food name and location details, returns nearby purchase locations
     """
+    # Validate Authentication
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    if not purchase_data.food_name or not purchase_data.food_name.strip(): 
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Food name is required and cannot be empty"
+            )
     # Main Implementation
 
     # Store request in DB
+    try:
+        user_email = current_user["email"]
+        current_timestamp = datetime.utcnow();
+        
+        purchase_record = {
+           "email": user_email,
+            "food_name": purchase_data.food_name.strip(),
+            "location_query": purchase_data.location_query.strip() if purchase_data.location_query else None,
+            "max_distance_km": purchase_data.max_distance_km if purchase_data.max_distance_km else None,
+            "timestamp": purchase_data.timestamp if purchase_data.timestamp else current_timestamp
+        }
+        result = purchase_loc_requests.insert_one(purchase_record)
+        return {"status":"successs", "inserted_id":str(result.inserted_id)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save request to database: {e}")
 
 
-    return
+   
+
 
 
 
